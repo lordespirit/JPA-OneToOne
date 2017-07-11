@@ -30,6 +30,10 @@ public class TestOneToOne {
 	
 	employee.setAddress(address);
 	
+	dbManager.connect();
+	dbManager.insert(employee);
+	employee.getAddress();
+	dbManager.close();
 		
 	}
 	
