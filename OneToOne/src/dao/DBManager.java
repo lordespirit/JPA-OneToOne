@@ -31,7 +31,7 @@ la orientación a objetos al interactuar con una base de datos
  */
 public class DBManager { 
 	
-	private static final String PERSISTENCE_UNIT_NAME = "JPATest"; 
+	private static final String PERSISTENCE_UNIT_NAME = "OneToOne"; 
 	private static EntityManagerFactory factory=null;
 	
 	EntityManager entitymanager; 
@@ -42,6 +42,9 @@ public class DBManager {
 		return factory; 
 	}
 	
+	public EntityManager getEntityManager(){
+		return entitymanager;
+	}
 	
 
 	public void connect() {
@@ -72,13 +75,15 @@ public class DBManager {
 
 
 	
-	@SuppressWarnings("rawtypes")
-	public void deleteAll(Class clazz){
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public <T> void deleteAll(Class clazz){
 		entitymanager.getTransaction().begin();
-		entitymanager.createQuery("DELETE FROM "+clazz.getSimpleName())
-				.executeUpdate();
+		ArrayList<T> list = selectAll(clazz);
+		for(T object: list)
+			entitymanager.remove(object);
 		entitymanager.getTransaction().commit();
 	}
+	
 	
 	
 	@SuppressWarnings("unchecked")
@@ -87,6 +92,18 @@ public class DBManager {
 		 return new ArrayList<T>(query.getResultList()); 
 	}
 
+	
+	/**
+	 * SELECT c FROM  Comments c WHERE c.user = 'pepe'   
+	 * SELECT c FROM  Comments c WHERE c.emeil = 'pepe@pepe.com'  
+	 * SELECT c FROM  Comments c WHERE c.id = 12  
+	 *  
+	 * 
+	 * @param clazz
+	 * @param column
+	 * @param equal
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
 	public <T> ArrayList<T> selectEqual(Class<T> clazz,String column,String equal){
 		  Query query = entitymanager.createQuery(
@@ -111,12 +128,10 @@ public class DBManager {
 				  	+ "WHERE c."+column+" "+bt);	    
 		  return new ArrayList<T>(query.getResultList()); 
 	}
-	
-	   
+	  
 	public void close() {
 		entitymanager.close();
 		entitymanager = null; 
 	}
-
 
 }
